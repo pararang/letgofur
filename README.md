@@ -97,6 +97,16 @@ Aliases: `gen-yml`, `yml`
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## Attribution
+
+The `crapi` directory contains code from the [GoCaproverAPI](https://github.com/ErSauravAdhikari/GoCaproverAPI) project, which is licensed under the Apache License 2.0. The original code has been incorporated into this project with minimal modifications to support the letgofur CLI functionality.
+
+Changes made to the original code include:
+- Minor adaptations for integration with the letgofur command structure
+- Remove some printed messages for cleaner CLI output
+
+All copyright notices and license terms from the original project have been preserved in the source files.
+
 ## To Do
 
 The following features are planned for future releases, based on the capabilities of the GoCaproverAPI:
@@ -128,4 +138,8 @@ The following features are planned for future releases, based on the capabilitie
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is licensed under the Apache License, Version 2.0 (the "License"). You may obtain a copy of the License at:
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the [LICENSE](LICENSE) file for the specific terms and conditions of the license.

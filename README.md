@@ -111,30 +111,32 @@ All copyright notices and license terms from the original project have been pres
 
 The following features are planned for future releases, based on the capabilities of the GoCaproverAPI:
 
-- **App Management**
-  - Create new applications (`CreateApp`)
-  - Remove/delete applications (`RemoveApp`)
-  - Force build applications (`ForceBuild`)
-  - Update application details and configurations
+- [ ] **App Management**
+  - [x] List all applications
+  - [x] generate app definition YAML file
+  - [ ] Create new applications 
+  - [ ] Remove/delete applications 
+  - [ ] Force build applications 
+  - [ ] Update application details and configurations
 
-- **Domain Management**
-  - Add custom domains to applications (`AddCustomDomain`)
-  - Enable SSL for base domains (`EnableBaseDomainSSL`)
-  - Enable SSL for custom domains (`EnableCustomDomainSSL`)
+- [ ] **Domain Management**
+  - [ ] Add custom domains to applications 
+  - [ ] Enable SSL for base domains 
+  - [ ] Enable SSL for custom domains 
 
-- **Resource Management**
-  - Update resource constraints (memory, CPU) for applications
-  - Scale application instances
+- [ ] **Resource Management**
+  - [ ] Update resource constraints (memory, CPU) for applications
+  - [ ] Scale application instances
 
-- **Deployment Options**
-  - Support for persistent data applications
-  - Configure environment variables
-  - Set up port mappings
+- [ ] **Deployment Options**
+  - [ ] Support for persistent data applications
+  - [ ] Configure environment variables
+  - [ ] Set up port mappings
 
-- **User Interface Improvements**
-  - Interactive mode for commands
-  - Progress indicators for long-running operations
-  - Colorized output for better readability
+- [ ] **User Interface Improvements**
+  - [ ] Interactive mode for commands
+  - [ ] Progress indicators for long-running operations
+  - [ ] Colorized output for better readability
 
 ## License
 

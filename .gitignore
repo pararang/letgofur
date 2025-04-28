@@ -1,1 +1,4 @@
 .idea
+/definitions
+*.yml
+letgofur

@@ -1,181 +1,131 @@
-# GoCaproverAPI!
+# letgofur
 
-![gophe r](https://github.com/ErSauravAdhikari/GoCaproverAPI/assets/69170305/4a846cbf-a342-4402-96c9-2e513f4b3823)
+letgofur (Leutenant Gofurr) is Captain Rover subordinat.
 
-GoCaproverAPI is a pure Go wrapper for caprover api for managing deployments in Caprover, a self hosted PAAS software. 
-It provides an easy-to-use API for interacting with Caprover and performing various deployment-related operations.
+## About
 
-This also adds additional functionality such as easy to add resource constraints that is not as easy to add using the official caprover webui.
+letgofur provides a simple and efficient way to interact with your CapRover server from the command line. It allows you to:
 
-Caprover Docs: https://caprover.com/
+- List all applications deployed on your CapRover instance
+- Connect to your CapRover server using authentication credentials
+- Manage your CapRover applications without using the web interface
+
+Built with Go and the forked [GoCaproverAPI](https://github.com/ErSauravAdhikari/GoCaproverAPI) as its base, letgofur makes it easy to automate and streamline your CapRover management tasks on your terminal.
 
 ## Installation
 
-To use GoCaproverAPI in your Go project, you can use the following command to add it as a dependency:
+### Prerequisites
 
-```shell
-go get github.com/ErSauravAdhikari/GoCaproverAPI
+- Go 1.23 or higher
+
+### Building from source
+
+```bash
+# Clone the repository
+git clone https://github.com/pararang/letgofur.git
+cd letgofur
+
+# Build the application
+go build -o letgofur
+
+# Make it executable (optional)
+chmod +x letgofur
+
+# Move to a directory in your PATH (optional)
+mv letgofur /usr/local/bin/
 ```
 
-## Documentation
-[https://pkg.go.dev/github.com/ErSauravAdhikari/GoCaproverAPI/crapi](https://pkg.go.dev/github.com/ErSauravAdhikari/GoCaproverAPI/crapi#Caprover)
+## Configuration
+
+You can configure letgofur using environment variables or command-line flags.
+
+### Environment Variables
+
+Create a `.env` file in the project root with the following variables:
+
+```
+URL=https://captain.your.domain
+PASSWORD=yourpassword
+```
+
+You can use the provided `.env.example` as a template:
+
+```bash
+cp .env.example .env
+# Edit .env with your credentials
+```
+
+### Command-line Flags
+
+Alternatively, you can provide credentials directly via command-line flags:
+
+```bash
+letgofur --host https://captain.your.domain --passwd yourpassword
+```
 
 ## Usage
 
-Here's a simple example that demonstrates how to use GoCaproverAPI:
+### List all applications
 
-```go
-package main
-
-import (
-	"fmt"
-	"log"
-
-	"github.com/ErSauravAdhikari/GoCaproverAPI/crapi"
-)
-
-func main() {
-	// Create a new Caprover instance
-	caprover, err := crapi.NewCaproverInstance("http://your-caprover-endpoint", "your-password")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Get details of all the apps
-	appDetails, err := caprover.GetAppDetails()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Print the app details
-	for _, app := range appDetails.Data.AppDefinitions {
-		fmt.Println("App Name:", app.AppName)
-		fmt.Println("Instance Count:", app.InstanceCount)
-		fmt.Println("Ports:", app.Ports)
-		fmt.Println()
-	}
-}
+```bash
+letgofur --host https://captain.your.domain --passwd yourpassword ls
 ```
 
-## API Documentation
+Or if you've configured the `.env` file:
 
-The following methods are available in the Caprover struct:
-
-1. `NewCaproverInstance(endpoint string, password string) (Caprover, error)`: This method is a constructor function that creates a new instance of the `Caprover` struct. It takes an `endpoint` and `password` as parameters and initializes the `Caprover` struct with the provided values. It also calls the `Login` method internally to authenticate with the Caprover instance using the provided credentials.
-
-2. `Login() error`: This method authenticates the client with the Caprover instance. It sends a POST request to the Caprover login endpoint with the provided password. If the login is successful, it retrieves and stores the authentication token for subsequent requests.
-
-3. `GetAppDetails() (ListAppResponse, error)`: This method retrieves the details of all the applications deployed on the Caprover instance. It sends a GET request to the Caprover app list endpoint and returns the list of applications along with their details.
-
-4. `GetAppDetailFor(appName string) (AppDefinition, error)`: This method retrieves the details of a specific application by its name. It calls the `GetAppDetails` method internally to get the list of all applications and then searches for the application with the matching name. If found, it returns the application details; otherwise, it returns an error.
-
-5. `GetDefaultUpdateRequest(appName string) (UpdateAppRequest, error)`: This method retrieves the default update request for a specific application. It calls the `GetAppDetails` method internally to get the list of all applications and then searches for the application with the matching name. If found, it returns an `UpdateAppRequest` containing the default values for updating the application; otherwise, it returns an error.
-
-6. `CreateApp(appName string, hasPersistentData bool) error`: This method creates a new application on the Caprover instance. It sends a POST request to the Caprover app register endpoint with the provided `appName` and `hasPersistentData` parameters. If the creation is successful, it returns nil; otherwise, it returns an error.
-
-7. `updateAppDetails(data UpdateAppRequest) error`: This method updates the details of an application on the Caprover instance. It sends a POST request to the Caprover app update endpoint with the provided `UpdateAppRequest` payload. If the update is successful, it returns nil; otherwise, it returns an error.
-
-8. `ForceBuild(token string) error`: This method triggers a forced build for an application on the Caprover instance. It sends a POST request to the Caprover app trigger build endpoint with the provided `token` parameter. If the build is successful, it returns nil; otherwise, it returns an error.
-
-9. `EnableBaseDomainSSL(appName string) error`: This method enables SSL on the base domain for an application. It sends a POST request to the Caprover enable base domain SSL endpoint with the provided `appName` parameter. If the SSL enablement is successful, it returns nil; otherwise, it returns an error.
-
-10. `AddCustomDomain(appName string, domain string) error`: This method adds a custom domain to an application. It sends a POST request to the Caprover add custom domain endpoint with the provided `appName` and `domain` parameters. If the domain addition is successful, it returns nil; otherwise, it returns an error.
-
-11. `EnableCustomDomainSSL(appName string, domain string) error`: This method enables SSL on a custom domain for an application. It sends a POST request to the Caprover enable custom domain SSL endpoint with the provided appName and domain parameters. If the SSL enablement is successful, it returns nil; otherwise, it returns an error. 
-
-12. `RemoveApp(appName string) error`: This method deletes an application from the Caprover instance. It deletes a given Caprover app based on the provided `appName` parameter. If the deletion is successful, it returns nil; otherwise, it returns an error.
-
-
-These methods provide a comprehensive set of functionalities to interact with a Caprover instance programmatically. They allow you to perform tasks such as creating and deleting applications, updating application details, scaling instances, managing custom domains, enabling SSL, retrieving and setting persistent data, triggering builds, and deploying applications. By utilizing these methods, you can automate and streamline your interactions with the Caprover platform.
-
-## Example
-Sure! Here are the updated examples using the proper structure:
-
-1. Example: Creating a new app with persistent data
-
-```go
-func main() {
-	// Initialize Caprover instance
-	caprover, err := crapi.NewCaproverInstance("https://your-caprover-instance.com", "your-password")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create a new app with persistent data
-	appName := "my-app"
-	err = caprover.CreateApp(appName, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("Successfully created app %s with persistent data.\n", appName)
-}
+```bash
+letgofur ls
 ```
 
-2. Example: Enabling SSL on the base domain
+### Generate YAML file for an app
 
-```go
-func main() {
-	// Initialize Caprover instance
-	caprover, err := crapi.NewCaproverInstance("https://your-caprover-instance.com", "your-password")
-	if err != nil {
-		log.Fatal(err)
-	}
+Generate a YAML representation of an app's definition:
 
-	// Enable SSL on the base domain for an app
-	appName := "my-app"
-	err = caprover.EnableBaseDomainSSL(appName)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("SSL enabled on base domain for app %s.\n", appName)
-}
+```bash
+letgofur --host https://captain.your.domain --passwd yourpassword generate-yml app-name
 ```
 
-3. Example: Adding a custom domain to an app
+You can specify a custom output file:
 
-```go
-func main() {
-	// Initialize Caprover instance
-	caprover, err := crapi.NewCaproverInstance("https://your-caprover-instance.com", "your-password")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Add a custom domain to an app
-	appName := "my-app"
-	domain := "custom-domain.com"
-	err = caprover.AddCustomDomain(appName, domain)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("Added custom domain %s to app %s.\n", domain, appName)
-}
+```bash
+letgofur generate-yml app-name --output ./configs/app-name.yml
 ```
 
-4. Example: Updating resource constraints for an app
+Aliases: `gen-yml`, `yml`
 
-```go
-func main() {
-	// Initialize Caprover instance
-	caprover, err := crapi.NewCaproverInstance("https://your-caprover-instance.com", "your-password")
-	if err != nil {
-		log.Fatal(err)
-	}
+## Contributing
 
-	// Update resource constraints for an app
-	appName := "my-app"
-	memoryInMB := int64(512)
-	cpuInUnits := 1.0
-	err = caprover.UpdateResourceConstraint(appName, memoryInMB, cpuInUnits)
-	if err != nil {
-		log.Fatal(err)
-	}
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-	fmt.Printf("Updated resource constraints for app %s.\n", appName)
-}
-```
+## To Do
 
-Please make sure to replace "https://your-caprover-instance.com" and "your-password" with the actual URL and password of your Caprover instance.
+The following features are planned for future releases, based on the capabilities of the GoCaproverAPI:
+
+- **App Management**
+  - Create new applications (`CreateApp`)
+  - Remove/delete applications (`RemoveApp`)
+  - Force build applications (`ForceBuild`)
+  - Update application details and configurations
+
+- **Domain Management**
+  - Add custom domains to applications (`AddCustomDomain`)
+  - Enable SSL for base domains (`EnableBaseDomainSSL`)
+  - Enable SSL for custom domains (`EnableCustomDomainSSL`)
+
+- **Resource Management**
+  - Update resource constraints (memory, CPU) for applications
+  - Scale application instances
+
+- **Deployment Options**
+  - Support for persistent data applications
+  - Configure environment variables
+  - Set up port mappings
+
+- **User Interface Improvements**
+  - Interactive mode for commands
+  - Progress indicators for long-running operations
+  - Colorized output for better readability
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).

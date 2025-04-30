@@ -33,8 +33,8 @@ var rootCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Welcome to letgofur!")
-		fmt.Println("Connected to host:", host)
+		fmt.Println("Welcome, Leutenant Gofurr!")
+		fmt.Println("Connected to the Captain at:", host)
 	},
 }
 

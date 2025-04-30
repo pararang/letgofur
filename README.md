@@ -93,6 +93,18 @@ letgofur generate-yml app-name --output ./configs/app-name.yml
 
 Aliases: `gen-yml`, `yml`
 
+### Update app configuration
+
+Apply configuration changes to an existing app using a YAML file:
+
+```bash
+letgofur --host https://captain.your.domain --passwd yourpassword apply ./configs/app-name.yml
+```
+
+This command updates app resources and instance count based on the configuration file.
+
+Aliases: `update`, `up`
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -113,11 +125,11 @@ The following features are planned for future releases, based on the capabilitie
 
 - [ ] **App Management**
   - [x] List all applications
-  - [x] generate app definition YAML file
+  - [x] Generate app definition YAML file
+  - [x] Update application details and configurations
   - [ ] Create new applications 
   - [ ] Remove/delete applications 
   - [ ] Force build applications 
-  - [ ] Update application details and configurations
 
 - [ ] **Domain Management**
   - [ ] Add custom domains to applications 
@@ -125,8 +137,8 @@ The following features are planned for future releases, based on the capabilitie
   - [ ] Enable SSL for custom domains 
 
 - [ ] **Resource Management**
-  - [ ] Update resource constraints (memory, CPU) for applications
-  - [ ] Scale application instances
+  - [x] Update resource constraints (memory, CPU) for applications
+  - [x] Scale application instances
 
 - [ ] **Deployment Options**
   - [ ] Support for persistent data applications

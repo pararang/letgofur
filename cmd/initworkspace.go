@@ -29,12 +29,15 @@ type Resource struct {
 	NanoCPUs    *int64 `yaml:"NanoCPUs"`
 }
 
+type TaskTemplate struct {
+	Resources Resources `yaml:"Resources"`
+}
+
 // ServiceUpdateOverride represents the structure of the ServiceUpdateOverride field
 type ServiceUpdateOverride struct {
-	TaskTemplate struct {
-		Resources Resources `yaml:"Resources"`
-	} `yaml:"TaskTemplate"`
+	TaskTemplate TaskTemplate `yaml:"TaskTemplate"`
 }
+
 
 var initWorspace = &cobra.Command{
 	Use:     "init",

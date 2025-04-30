@@ -21,7 +21,7 @@ var rootCmd = &cobra.Command{
 	Long:  "letgofur (letnan golang) is a cli tool for accessing caprover instances",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if host == "" || passwd == "" {
-			return fmt.Errorf("both --host and --password are required")
+			return fmt.Errorf("both --host and --passwd are required")
 		}
 
 		capInstance, err := crapi.NewCaproverInstance(host, passwd)
@@ -47,6 +47,7 @@ func init() {
 
 	rootCmd.AddCommand(lsCmd)
 	rootCmd.AddCommand(generateYmlCmd)
+	rootCmd.AddCommand(initWorspace)
 }
 
 func Execute() {

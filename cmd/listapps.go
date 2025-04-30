@@ -17,7 +17,6 @@ var lsCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		for _, app := range appDetails.Data.AppDefinitions {
 			fmt.Println("- " + app.AppName)
 		}

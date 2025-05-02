@@ -1,6 +1,7 @@
 .idea
 /definitions
 *.yml
+!.github/**/*.yml
 letgofur
 /build
 /example

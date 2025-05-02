@@ -38,8 +38,7 @@ The first workflow involves managing all your CapRover applications in a single 
 5. **Benefits**
    - Single source of truth for all application configurations
    - Easy to see resource allocation across all applications
-   - Simplified backup and restoration of configurations
-   - Consistent infrastructure management
+   - Ideal for single people or small teams managing multiple applications
 
 ## Workflow 2: Embedded Configuration (Coming Soon)
 

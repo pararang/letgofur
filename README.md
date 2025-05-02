@@ -19,9 +19,24 @@ Built with Go and the forked [GoCaproverAPI](https://github.com/ErSauravAdhikari
 
 ## Installation
 
-### Prerequisites
+### Download pre-built binary
 
-- Go 1.20 or higher
+You can download the pre-built binary for Linux from the [GitHub Releases](https://github.com/pararang/letgofur/releases) page:
+
+```bash
+# Download the latest release (replace X.Y.Z with the latest version)
+curl -L https://github.com/pararang/letgofur/releases/download/vX.Y.Z/letgofur-linux-amd64 -o letgofur
+
+# Make it executable
+chmod +x letgofur
+
+# Move to a directory in your PATH (optional)
+sudo mv letgofur /usr/local/bin/
+```
+
+### Prerequisites for building from source
+
+- Go 1.23 or higher
 
 ### Building from source
 

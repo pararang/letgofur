@@ -18,6 +18,7 @@ package crapi
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -25,12 +26,14 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Caprover struct {
 	Endpoint string
 	Password string
 	Token    string
+	client   *http.Client
 }
 
 // NewCaproverInstance (endpoint string, password string) (Caprover, error): This
@@ -44,6 +47,9 @@ func NewCaproverInstance(endpoint string, password string) (Caprover, error) {
 		Endpoint: endpoint,
 		Password: password,
 		Token:    "",
+		client: &http.Client{
+			Timeout: 30 * time.Second,
+		},
 	}
 
 	err := cp.Login()
@@ -82,26 +88,34 @@ func (c *Caprover) Login() error {
 	jsonEncode, _ := json.Marshal(data)
 	payload := bytes.NewBuffer(jsonEncode)
 
-	req, _ := http.NewRequest("POST", url, payload)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, payload)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
 
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
 		return errors.New("login Error")
 	}
 
-	defer res.Body.Close()
-
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
 
 	var rsp LoginResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	c.Token = rsp.Data.Token
@@ -117,25 +131,30 @@ func (c *Caprover) GetAppDetails() (ListAppResponse, error) {
 
 	url := c.buildURL(URLAppListPath)
 
-	data := make(map[string]string)
-	data["password"] = c.Password
-	jsonEncode, _ := json.Marshal(data)
-	payload := bytes.NewBuffer(jsonEncode)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
-	req, _ := http.NewRequest("GET", url, payload)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return ListAppResponse{}, fmt.Errorf("error creating request: %w", err)
+	}
+	
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return ListAppResponse{}, err
 	}
-
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return ListAppResponse{}, fmt.Errorf("error reading response body: %w", err)
+	}
+	
 	var rsp ListAppResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return ListAppResponse{}, fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	return rsp, nil
@@ -217,25 +236,36 @@ func (c *Caprover) CreateApp(appName string, hasPersistentData bool) error {
 	data["appName"] = appName
 	data["hasPersistentData"] = hasPersistentData
 
-	jsonEncode, _ := json.Marshal(data)
+	jsonEncode, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("error marshaling request data: %w", err)
+	}
 	payload := bytes.NewBuffer(jsonEncode)
 
-	req, _ := http.NewRequest("POST", url, payload)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, payload)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
 
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
-
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
 
 	var rsp GenericAppResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	if rsp.Status == 100 {
@@ -255,25 +285,36 @@ func (c *Caprover) updateAppDetails(data UpdateAppRequest) error {
 
 	url := c.buildURL(URLUpdateAppPath)
 
-	jsonEncode, _ := json.Marshal(data)
+	jsonEncode, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("error marshaling request data: %w", err)
+	}
 	payload := bytes.NewBuffer(jsonEncode)
 
-	req, _ := http.NewRequest("POST", url, payload)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, payload)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
 
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
-
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
 
 	var rsp GenericAppResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	if rsp.Status == 100 {
@@ -292,21 +333,30 @@ func (c *Caprover) ForceBuild(token string) error {
 
 	url := c.buildURL(URLAppTriggerBuild) + "?namespace=captain&token=" + token
 
-	req, _ := http.NewRequest("POST", url, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, nil)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
 
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
-
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
+	
 	var rsp GenericAppResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	if rsp.Status == 100 {
@@ -314,7 +364,6 @@ func (c *Caprover) ForceBuild(token string) error {
 	}
 
 	return errors.New(rsp.Description)
-
 }
 
 // EnableBaseDomainSSL (appName string) error: This method enables SSL on the
@@ -328,24 +377,36 @@ func (c *Caprover) EnableBaseDomainSSL(appName string) error {
 
 	data := make(map[string]string)
 	data["appName"] = appName
-	jsonEncode, _ := json.Marshal(data)
+	jsonEncode, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("error marshaling request data: %w", err)
+	}
 	payload := bytes.NewBuffer(jsonEncode)
 
-	req, _ := http.NewRequest("POST", url, payload)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, payload)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
 
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
 
 	var rsp GenericAppResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	if rsp.Status == 100 {
@@ -367,25 +428,36 @@ func (c *Caprover) AddCustomDomain(appName string, domain string) error {
 	data := make(map[string]string)
 	data["appName"] = appName
 	data["customDomain"] = domain
-	jsonEncode, _ := json.Marshal(data)
+	jsonEncode, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("error marshaling request data: %w", err)
+	}
 	payload := bytes.NewBuffer(jsonEncode)
 
-	req, _ := http.NewRequest("POST", url, payload)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, payload)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
 
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
-
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
 
 	var rsp GenericAppResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	if rsp.Status == 100 {
@@ -408,25 +480,36 @@ func (c *Caprover) EnableCustomDomainSSL(appName string, domain string) error {
 	data := make(map[string]string)
 	data["appName"] = appName
 	data["customDomain"] = domain
-	jsonEncode, _ := json.Marshal(data)
+	jsonEncode, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("error marshaling request data: %w", err)
+	}
 	payload := bytes.NewBuffer(jsonEncode)
 
-	req, _ := http.NewRequest("POST", url, payload)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, payload)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
 
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
-
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
 
 	var rsp GenericAppResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	if rsp.Status == 100 {
@@ -577,25 +660,38 @@ func (c *Caprover) UpdateResourceConstraint(appName string, memoryInMB int64, cp
 	return err
 }
 
+// GetBuildLogs retrieves the build logs for a specific application
 func (c *Caprover) GetBuildLogs(appName string) (string, error) {
 	fmt.Println("Getting Build Logs")
 
 	url := c.buildURL(URLAppBuildLog) + "/" + appName + "/"
 
-	req, _ := http.NewRequest("GET", url, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return "", fmt.Errorf("error creating request: %w", err)
+	}
+	
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return "", err
 	}
-
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	// Use a limited reader to prevent excessive memory usage
+	const maxLogSize = 10 * 1024 * 1024 // 10MB limit
+	body, err := io.ReadAll(io.LimitReader(res.Body, maxLogSize))
+	if err != nil {
+		return "", fmt.Errorf("error reading response body: %w", err)
+	}
+
 	var rsp AppBuildLogResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return "", fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	logLines := strings.Join(rsp.Data.Logs.Lines, "\n")
@@ -603,30 +699,41 @@ func (c *Caprover) GetBuildLogs(appName string) (string, error) {
 	return logLines, nil
 }
 
+// GetAppLogs retrieves the application logs for a specific application
 func (c *Caprover) GetAppLogs(appName string) (string, error) {
 	fmt.Println("Getting App Logs")
 
 	url := c.buildURL(URLAppBuildLog) + "/" + appName + "/logs"
 
-	req, _ := http.NewRequest("GET", url, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return "", fmt.Errorf("error creating request: %w", err)
+	}
+	
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return "", err
 	}
-
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
-	var rsp AppLogResponse
-	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+	// Use a limited reader to prevent excessive memory usage
+	const maxLogSize = 10 * 1024 * 1024 // 10MB limit
+	body, err := io.ReadAll(io.LimitReader(res.Body, maxLogSize))
+	if err != nil {
+		return "", fmt.Errorf("error reading response body: %w", err)
 	}
 
-	logLines := rsp.Data.Logs
+	var rsp AppLogResponse
+	if err := json.Unmarshal(body, &rsp); err != nil {
+		return "", fmt.Errorf("error unmarshaling response: %w", err)
+	}
 
-	return logLines, nil
+	return rsp.Data.Logs, nil
 }
 
 // RemoveApp (appName string) error`: This method deletes an application from the
@@ -640,25 +747,36 @@ func (c *Caprover) RemoveApp(appName string) error {
 
 	data := make(map[string]string)
 	data["appName"] = appName
-	jsonEncode, _ := json.Marshal(data)
+	jsonEncode, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("error marshaling request data: %w", err)
+	}
 	payload := bytes.NewBuffer(jsonEncode)
 
-	req, _ := http.NewRequest("POST", url, payload)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, payload)
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
 
 	c.addHeaders(req)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
-
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error reading response body: %w", err)
+	}
 
 	var rsp GenericAppResponse
 	if err := json.Unmarshal(body, &rsp); err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
 	if rsp.Status == 100 {

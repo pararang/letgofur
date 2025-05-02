@@ -69,47 +69,53 @@ var initWorkspace = &cobra.Command{
 			log.Fatalf("Error getting app details: %v", err)
 		}
 
-		for _, app := range appDetails.Data.AppDefinitions {
-			config := AppConfig{
-				AppName:   app.AppName,
-				Instances: app.InstanceCount,
+		// Process apps in batches to avoid excessive memory usage
+		const batchSize = 10
+		for i := 0; i < len(appDetails.Data.AppDefinitions); i += batchSize {
+			end := i + batchSize
+			if end > len(appDetails.Data.AppDefinitions) {
+				end = len(appDetails.Data.AppDefinitions)
 			}
 
-			// Extract resource limits if available
-			if app.ServiceUpdateOverride != "" {
-
-				// The ServiceUpdateOverride is a YAML string
-				// Example: "TaskTemplate:\n  Resources:\n    Limits:\n      MemoryBytes:  16777216"
-				var suo ServiceUpdateOverride
-
-				err := yaml.Unmarshal([]byte(app.ServiceUpdateOverride), &suo)
-				if err != nil {
-					log.Printf("Error parsing ServiceUpdateOverride for app '%s': %v", app.AppName, err)
-					log.Printf("Raw ServiceUpdateOverride: %s", app.ServiceUpdateOverride)
-
-					config.Resources = Resources{}
-				} else {
-					config.Resources = suo.TaskTemplate.Resources
+			for _, app := range appDetails.Data.AppDefinitions[i:end] {
+				config := AppConfig{
+					AppName:   app.AppName,
+					Instances: app.InstanceCount,
 				}
-			} else {
-				config.Resources = Resources{}
-			}
 
-			// Convert config to YAML
-			yamlData, err := yaml.Marshal(config)
-			if err != nil {
-				log.Printf("Error marshaling config for app '%s': %v", app.AppName, err)
-				continue
-			}
+				// Extract resource limits if available
+				if app.ServiceUpdateOverride != "" {
+					// The ServiceUpdateOverride is a YAML string
+					var suo ServiceUpdateOverride
 
-			// Write YAML to file
-			configFile := filepath.Join(workspaceDir, fmt.Sprintf("%s.yml", app.AppName))
-			if err := os.WriteFile(configFile, yamlData, 0644); err != nil {
-				log.Printf("Error writing config for app '%s': %v", app.AppName, err)
-				continue
-			}
+					err := yaml.Unmarshal([]byte(app.ServiceUpdateOverride), &suo)
+					if err != nil {
+						log.Printf("Error parsing ServiceUpdateOverride for app '%s': %v", app.AppName, err)
+						log.Printf("Raw ServiceUpdateOverride: %s", app.ServiceUpdateOverride)
+						config.Resources = Resources{}
+					} else {
+						config.Resources = suo.TaskTemplate.Resources
+					}
+				} else {
+					config.Resources = Resources{}
+				}
 
-			fmt.Printf("Generated config for app '%s' at '%s'\n", app.AppName, configFile)
+				// Convert config to YAML
+				yamlData, err := yaml.Marshal(config)
+				if err != nil {
+					log.Printf("Error marshaling config for app '%s': %v", app.AppName, err)
+					continue
+				}
+
+				// Write YAML to file
+				configFile := filepath.Join(workspaceDir, fmt.Sprintf("%s.yml", app.AppName))
+				if err := os.WriteFile(configFile, yamlData, 0644); err != nil {
+					log.Printf("Error writing config for app '%s': %v", app.AppName, err)
+					continue
+				}
+
+				fmt.Printf("Generated config for app '%s' at '%s'\n", app.AppName, configFile)
+			}
 		}
 
 		fmt.Printf("\nConfiguration folder structure created at '%s'\n", workspaceDir)

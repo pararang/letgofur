@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -12,13 +11,14 @@ var lsCmd = &cobra.Command{
 	Aliases: []string{"addition"},
 	Short:   "list all apps",
 	Long:    "show all the apps in the caprover instance",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		appDetails, err := captain.GetAppDetails()
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("error getting app details: %w", err)
 		}
 		for _, app := range appDetails.Data.AppDefinitions {
 			fmt.Println("- " + app.AppName)
 		}
+		return nil
 	},
 }

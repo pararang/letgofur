@@ -89,15 +89,8 @@ func hasResourceConstraints(res *Resources) bool {
 		return false
 	}
 
-	if res.Limits.MemoryBytes != nil || res.Limits.NanoCPUs != nil {
-		return true
-	}
-
-	if res.Reservations.MemoryBytes != nil || res.Reservations.NanoCPUs != nil {
-		return true
-	}
-
-	return false
+	return res.Limits.MemoryBytes != nil || res.Limits.NanoCPUs != nil ||
+		res.Reservations.MemoryBytes != nil || res.Reservations.NanoCPUs != nil
 }
 
 func init() {

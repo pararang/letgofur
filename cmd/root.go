@@ -46,8 +46,7 @@ func init() {
 	rootCmd.MarkPersistentFlagRequired("passwd")
 
 	rootCmd.AddCommand(lsCmd)
-	rootCmd.AddCommand(generateYmlCmd)
-	rootCmd.AddCommand(initWorspace)
+	rootCmd.AddCommand(initWorkspace)
 }
 
 func Execute() {

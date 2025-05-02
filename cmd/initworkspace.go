@@ -38,8 +38,7 @@ type ServiceUpdateOverride struct {
 	TaskTemplate TaskTemplate `yaml:"TaskTemplate"`
 }
 
-
-var initWorspace = &cobra.Command{
+var initWorkspace = &cobra.Command{
 	Use:     "init",
 	Short:   "Initialize a letgofur workspace in the current directory",
 	Long:    "Initialize a letgofur workspace in the current directory with exsisting apps.",

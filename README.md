@@ -5,6 +5,8 @@ letgofur (Lieutenant Gofurr) is a CapRover (Captain Rover) subordinate.
 Simple CLI for CapRover API, built with Go. Help you to define your infrastructure hosted with CapRover in a declarative way. It is designed to be a simple and efficient command-line interface for managing your CapRover applications and resources.
 It allows you to easily interact with your CapRover server, manage applications, and automate tasks without the need for a web interface.
 
+CapRover is an open-source platform that simplifies the deployment and management of applications on cloud servers. It provides a user-friendly interface for managing Docker containers, making it easy to deploy, scale, and monitor applications. Read more about CapRover [here](https://caprover.com/).
+
 ## About
 
 letgofur provides a simple and efficient way to interact with your CapRover server from the command line. It allows you to:

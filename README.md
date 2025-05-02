@@ -1,6 +1,9 @@
 # letgofur
 
-letgofur (Leutenant Gofurr) is Captain Rover subordinat.
+letgofur (Lieutenant Gofurr) is a CapRover (Captain Rover) subordinate.
+
+Simple CLI for CapRover API, built with Go. Help you to define your infrastructure hosted with CapRover in a declarative way. It is designed to be a simple and efficient command-line interface for managing your CapRover applications and resources.
+It allows you to easily interact with your CapRover server, manage applications, and automate tasks without the need for a web interface.
 
 ## About
 
@@ -16,7 +19,7 @@ Built with Go and the forked [GoCaproverAPI](https://github.com/ErSauravAdhikari
 
 ### Prerequisites
 
-- Go 1.23 or higher
+- Go 1.20 or higher
 
 ### Building from source
 
@@ -37,27 +40,9 @@ mv letgofur /usr/local/bin/
 
 ## Configuration
 
-You can configure letgofur using environment variables or command-line flags.
-
-### Environment Variables
-
-Create a `.env` file in the project root with the following variables:
-
-```
-URL=https://captain.your.domain
-PASSWORD=yourpassword
-```
-
-You can use the provided `.env.example` as a template:
-
-```bash
-cp .env.example .env
-# Edit .env with your credentials
-```
-
 ### Command-line Flags
 
-Alternatively, you can provide credentials directly via command-line flags:
+You have provide credentials directly via command-line flags:
 
 ```bash
 letgofur --host https://captain.your.domain --passwd yourpassword
@@ -71,39 +56,38 @@ letgofur --host https://captain.your.domain --passwd yourpassword
 letgofur --host https://captain.your.domain --passwd yourpassword ls
 ```
 
-Or if you've configured the `.env` file:
+### Create a workspace
+Initialize a workspace for infrastructure as code configuration:
 
 ```bash
-letgofur ls
+letgofur --host https://captain.your.domain --passwd yourpassword init
 ```
 
-### Generate YAML file for an app
+This command will create a directory named based on the hostname of your CapRover instance. Inside this directory, you will find all the current apps config. Currently this only supports the instance and app resource configurations.
 
-Generate a YAML representation of an app's definition:
-
-```bash
-letgofur --host https://captain.your.domain --passwd yourpassword generate-yml app-name
+```yaml
+# Example of the generated YAML file
+# captain.your.domain/app-name.yml
+AppName: app-name
+Instances: 3
+Resources:
+    Limits:
+        MemoryBytes: 16777216
+        NanoCPUs: 1000000
+    Reservations:
+        MemoryBytes: 1122323
+        NanoCPUs: 1000000
 ```
-
-You can specify a custom output file:
-
-```bash
-letgofur generate-yml app-name --output ./configs/app-name.yml
-```
-
-Aliases: `gen-yml`, `yml`
 
 ### Update app configuration
 
-Apply configuration changes to an existing app using a YAML file:
+Apply configuration changes to an existing app using a YAML file. Lets say you are inside the generated workspace directory:
 
 ```bash
-letgofur --host https://captain.your.domain --passwd yourpassword apply ./configs/app-name.yml
+letgofur --host https://captain.your.domain --passwd yourpassword apply app-name.yml
 ```
 
 This command updates app resources and instance count based on the configuration file.
-
-Aliases: `update`, `up`
 
 ## Contributing
 
@@ -125,7 +109,7 @@ The following features are planned for future releases, based on the capabilitie
 
 - [ ] **App Management**
   - [x] List all applications
-  - [x] Generate app definition YAML file
+  - [x] Generate workspace for infra as code configuration
   - [x] Update application details and configurations
   - [ ] Create new applications 
   - [ ] Remove/delete applications 
@@ -135,13 +119,13 @@ The following features are planned for future releases, based on the capabilitie
   - [ ] Add custom domains to applications 
   - [ ] Enable SSL for base domains 
   - [ ] Enable SSL for custom domains 
+  - [ ] Enable force redirect to the custom domain
 
-- [ ] **Resource Management**
+- [x] **Resource Management**
   - [x] Update resource constraints (memory, CPU) for applications
   - [x] Scale application instances
 
 - [ ] **Deployment Options**
-  - [ ] Support for persistent data applications
   - [ ] Configure environment variables
   - [ ] Set up port mappings
 
@@ -149,6 +133,7 @@ The following features are planned for future releases, based on the capabilitie
   - [ ] Interactive mode for commands
   - [ ] Progress indicators for long-running operations
   - [ ] Colorized output for better readability
+  - [ ] Interective mode with session
 
 ## License
 

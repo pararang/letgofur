@@ -106,6 +106,8 @@ letgofur --host https://captain.your.domain --passwd yourpassword apply app-name
 
 This command updates app resources and instance count based on the configuration file.
 
+For a detailed guide on implementing infrastructure-as-code workflows with letgofur, please see [WORKFLOW.md](WORKFLOW.md).
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

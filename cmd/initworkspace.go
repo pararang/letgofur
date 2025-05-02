@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -38,11 +39,13 @@ type ServiceUpdateOverride struct {
 	TaskTemplate TaskTemplate `yaml:"TaskTemplate"`
 }
 
+var initGit bool
+
 var initWorkspace = &cobra.Command{
 	Use:     "init",
 	Short:   "Initialize a letgofur workspace in the current directory",
 	Long:    "Initialize a letgofur workspace in the current directory with exsisting apps.",
-	Example: "letgofur init --host=<host> --passwd=<password>",
+	Example: "letgofur init --host=<host> --passwd=<password> [--git]",
 	Aliases: []string{"initialize", "setup"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		parsedURL, err := url.Parse(host)
@@ -120,6 +123,19 @@ var initWorkspace = &cobra.Command{
 
 		fmt.Printf("\nConfiguration folder structure created at '%s'\n", workspaceDir)
 		fmt.Printf("This folder contains configuration files for all apps in the CapRover instance at %s\n", host)
+		
+		// Initialize git repository if the flag is provided
+		if initGit {
+			fmt.Printf("Initializing git repository in '%s'...\n", workspaceDir)
+			cmd := exec.Command("git", "init")
+			cmd.Dir = workspaceDir
+			if err := cmd.Run(); err != nil {
+				log.Printf("Warning: Failed to initialize git repository: %v", err)
+			} else {
+				fmt.Println("Git repository initialized successfully.")
+			}
+		}
+		
 		return nil
 	},
 }

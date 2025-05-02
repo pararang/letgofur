@@ -80,7 +80,13 @@ Initialize a workspace for infrastructure as code configuration:
 letgofur --host https://captain.your.domain --passwd yourpassword init
 ```
 
-This command will create a directory named based on the hostname of your CapRover instance. Inside this directory, you will find all the current apps config. Currently this only supports the instance and app resource configurations.
+You can also initialize a git repository in the workspace directory by adding the `--git` flag:
+
+```bash
+letgofur --host https://captain.your.domain --passwd yourpassword init --git
+```
+
+This command will create a directory named based on the hostname of your CapRover instance. Inside this directory, you will find all the current apps config. Currently this only supports the instance and app resource configurations. If the `--git` flag is provided, it will also initialize a git repository in the workspace directory.
 
 ```yaml
 # Example of the generated YAML file

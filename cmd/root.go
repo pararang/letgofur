@@ -45,6 +45,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&passwd, "passwd", "", "The password to connect to the host")
 	rootCmd.MarkPersistentFlagRequired("passwd")
 
+	initWorkspace.Flags().BoolVar(&initGit, "git", false, "Initialize a git repository in the generated workspace")
+
 	rootCmd.AddCommand(lsCmd)
 	rootCmd.AddCommand(initWorkspace)
 }

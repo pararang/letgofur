@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -50,7 +51,7 @@ var initWorkspace = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		parsedURL, err := url.Parse(host)
 		if err != nil {
-			log.Fatalf("Error parsing host URL: %v", err)
+			log.Fatalf(color.RedString("Error parsing host URL: %v", err))
 		}
 
 		hostname := parsedURL.Hostname()
@@ -58,18 +59,18 @@ var initWorkspace = &cobra.Command{
 
 		currentDir, err := os.Getwd()
 		if err != nil {
-			return fmt.Errorf("failed to get current directory: %w", err)
+			return fmt.Errorf(color.RedString("failed to get current directory: %w", err))
 		}
 
 		workspaceDir := filepath.Join(currentDir, dirName)
 		if err := os.MkdirAll(workspaceDir, 0755); err != nil {
-			log.Fatalf("Error creating workingspace directory: %v", err)
+			log.Fatalf(color.RedString("Error creating workingspace directory: %v", err))
 		}
 
 		// Get all app details
 		appDetails, err := captain.GetAppDetails()
 		if err != nil {
-			log.Fatalf("Error getting app details: %v", err)
+			log.Fatalf(color.RedString("Error getting app details: %v", err))
 		}
 
 		// Process apps in batches to avoid excessive memory usage
@@ -93,8 +94,8 @@ var initWorkspace = &cobra.Command{
 
 					err := yaml.Unmarshal([]byte(app.ServiceUpdateOverride), &suo)
 					if err != nil {
-						log.Printf("Error parsing ServiceUpdateOverride for app '%s': %v", app.AppName, err)
-						log.Printf("Raw ServiceUpdateOverride: %s", app.ServiceUpdateOverride)
+						fmt.Println(color.RedString("Error parsing ServiceUpdateOverride for app '%s': %v", app.AppName, err))
+						fmt.Println(color.YellowString("Raw ServiceUpdateOverride: %s", app.ServiceUpdateOverride))
 						config.Resources = Resources{}
 					} else {
 						config.Resources = suo.TaskTemplate.Resources
@@ -106,33 +107,33 @@ var initWorkspace = &cobra.Command{
 				// Convert config to YAML
 				yamlData, err := yaml.Marshal(config)
 				if err != nil {
-					log.Printf("Error marshaling config for app '%s': %v", app.AppName, err)
+					fmt.Println(color.RedString("Error marshaling config for app '%s': %v", app.AppName, err))
 					continue
 				}
 
 				// Write YAML to file
 				configFile := filepath.Join(workspaceDir, fmt.Sprintf("%s.yml", app.AppName))
 				if err := os.WriteFile(configFile, yamlData, 0644); err != nil {
-					log.Printf("Error writing config for app '%s': %v", app.AppName, err)
+					fmt.Println(color.RedString("Error writing config for app '%s': %v", app.AppName, err))
 					continue
 				}
 
-				fmt.Printf("Generated config for app '%s' at '%s'\n", app.AppName, configFile)
+				fmt.Println(color.CyanString("Generated config for app '%s' at '%s'", app.AppName, configFile))
 			}
 		}
 
-		fmt.Printf("\nConfiguration folder structure created at '%s'\n", workspaceDir)
-		fmt.Printf("This folder contains configuration files for all apps in the CapRover instance at %s\n", host)
-		
+		fmt.Println(color.GreenString("\nConfiguration folder structure created at '%s'", workspaceDir))
+		fmt.Println(color.GreenString("This folder contains configuration files for all apps in the CapRover instance at %s", host))
+
 		// Initialize git repository if the flag is provided
 		if initGit {
-			fmt.Printf("Initializing git repository in '%s'...\n", workspaceDir)
+			fmt.Println(color.CyanString("Initializing git repository in '%s'...", workspaceDir))
 			cmd := exec.Command("git", "init")
 			cmd.Dir = workspaceDir
 			if err := cmd.Run(); err != nil {
-				log.Printf("Warning: Failed to initialize git repository: %v", err)
+				fmt.Println(color.YellowString("Warning: Failed to initialize git repository: %v", err))
 			} else {
-				fmt.Println("Git repository initialized successfully.")
+				fmt.Println(color.GreenString("Git repository initialized successfully."))
 			}
 		}
 		

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -20,42 +21,42 @@ var updateAppCmd = &cobra.Command{
 
 		// Check if file exists
 		if _, err := os.Stat(configFile); os.IsNotExist(err) {
-			return fmt.Errorf("configuration file not found: %s", configFile)
+			return fmt.Errorf(color.RedString("configuration file not found: %s", configFile))
 		}
 
 		// Read the configuration file
 		yamlData, err := os.ReadFile(configFile)
 		if err != nil {
-			return fmt.Errorf("error reading configuration file: %w", err)
+			return fmt.Errorf(color.RedString("error reading configuration file: %w", err))
 		}
 
 		// Parse the YAML configuration
 		var config AppConfig
 		if err := yaml.Unmarshal(yamlData, &config); err != nil {
-			return fmt.Errorf("error parsing YAML configuration: %w", err)
+			return fmt.Errorf(color.RedString("error parsing YAML configuration: %w", err))
 		}
 
 		// Validate the configuration
 		if config.AppName == "" {
-			return fmt.Errorf("invalid configuration: AppName is required")
+			return fmt.Errorf(color.RedString("invalid configuration: AppName is required"))
 		}
 
-		fmt.Printf("Updating app '%s'...\n", config.AppName)
+		fmt.Println(color.CyanString("Updating app '%s'...", config.AppName))
 
 		// Get the current app configuration then override it with the new one defined in the config file
 		currentConfig, err := captain.GetDefaultUpdateRequest(config.AppName)
 		if err != nil {
-			return fmt.Errorf("error getting current app configuration: %w", err)
+			return fmt.Errorf(color.RedString("error getting current app configuration: %w", err))
 		}
 
 		// Update instance count
 		if config.Instances > 0 {
-			fmt.Printf("Setting instance count to %d...\n", config.Instances)
+			fmt.Println(color.CyanString("Setting instance count to %d...", config.Instances))
 			currentConfig.InstanceCount = config.Instances
 		}
 
 		if hasResourceConstraints(&config.Resources) {
-			fmt.Println("Updating resource constraints...")
+			fmt.Println(color.CyanString("Updating resource constraints..."))
 
 			suo := ServiceUpdateOverride{
 				TaskTemplate: TaskTemplate{
@@ -65,7 +66,7 @@ var updateAppCmd = &cobra.Command{
 
 			suoBytes, err := yaml.Marshal(suo)
 			if err != nil {
-				return fmt.Errorf("error marshaling resource constraints: %w", err)
+				return fmt.Errorf(color.RedString("error marshaling resource constraints: %w", err))
 			}
 
 			currentConfig.ServiceUpdateOverride = string(suoBytes)
@@ -75,10 +76,10 @@ var updateAppCmd = &cobra.Command{
 
 		err = captain.UpdateConfig(currentConfig)
 		if err != nil {
-			return fmt.Errorf("error updating app configuration: %w", err)
+			return fmt.Errorf(color.RedString("error updating app configuration: %w", err))
 		}
 
-		fmt.Printf("App '%s' updated successfully!\n", config.AppName)
+		fmt.Println(color.GreenString("App '%s' updated successfully!", config.AppName))
 		return nil
 	},
 }

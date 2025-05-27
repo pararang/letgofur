@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/fatih/color"
 	"github.com/pararang/letgofur/crapi"
 	"github.com/spf13/cobra"
 )
@@ -21,20 +22,20 @@ var rootCmd = &cobra.Command{
 	Long:  "letgofur (letnan golang) is a cli tool for accessing caprover instances",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if host == "" || passwd == "" {
-			return fmt.Errorf("both --host and --passwd are required")
+			return fmt.Errorf(color.RedString("both --host and --passwd are required"))
 		}
 
 		capInstance, err := crapi.NewCaproverInstance(host, passwd)
 		if err != nil {
-			return fmt.Errorf("error creating Caprover instance: %w", err)
+			return fmt.Errorf(color.RedString("error creating Caprover instance: %w", err))
 		}
 
 		captain = &capInstance
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Welcome, Leutenant Gofurr!")
-		fmt.Println("Connected to the Captain at:", host)
+		color.Cyan("Welcome, Leutenant Gofurr!")
+		color.Green("Connected to the Captain at: %s", host)
 	},
 }
 
@@ -53,7 +54,7 @@ func init() {
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Oops. An error while executing letnan '%s'\n", err)
+		fmt.Fprintf(os.Stderr, color.RedString("Oops. An error while executing letnan '%s'\n", err))
 		os.Exit(1)
 	}
 }
